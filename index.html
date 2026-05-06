@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulation6 — Coming Soon</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --black:#020205;
+  --cyan:#00D4FF;
+  --gold:#C8973A;
+  --gold-light:#E8B84B;
+  --white:#F0F0F8;
+  --muted:#4A4A60;
+}
+
+html,body{
+  width:100%;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+body{
+  background:var(--black);
+  color:var(--white);
+  font-family:'DM Sans',sans-serif;
+  font-weight:300;
+  position:relative;
+}
+
+/* ─── ANIMATED BACKGROUND ─── */
+.bg-wrap{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  overflow:hidden;
+}
+
+/* Grid floor perspective */
+.grid-floor{
+  position:absolute;
+  bottom:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:200vw;
+  height:70vh;
+  background:
+    linear-gradient(rgba(0,212,255,.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,.06) 1px, transparent 1px);
+  background-size:60px 60px;
+  transform-origin:bottom center;
+  transform:translateX(-50%) perspective(800px) rotateX(75deg);
+  mask-image:linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,.4) 40%, transparent 70%);
+  -webkit-mask-image:linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,.4) 40%, transparent 70%);
+  animation:gridPulse 4s ease-in-out infinite;
+}
+
+@keyframes gridPulse{
+  0%,100%{opacity:.7}
+  50%{opacity:1}
+}
+
+/* Radial glow from bottom center */
+.bg-glow-center{
+  position:absolute;
+  bottom:-20%;
+  left:50%;
+  transform:translateX(-50%);
+  width:160vw;
+  height:80vh;
+  background:radial-gradient(ellipse at center bottom, rgba(0,212,255,.12) 0%, rgba(0,212,255,.04) 35%, transparent 65%);
+  animation:glowPulse 5s ease-in-out infinite;
+}
+
+@keyframes glowPulse{
+  0%,100%{opacity:.7;transform:translateX(-50%) scale(1)}
+  50%{opacity:1;transform:translateX(-50%) scale(1.05)}
+}
+
+/* Side accent beams */
+.beam{
+  position:absolute;
+  width:1px;
+  background:linear-gradient(to bottom, transparent 0%, var(--cyan) 40%, transparent 100%);
+  opacity:0;
+  animation:beamAnim 6s ease-in-out infinite;
+}
+.beam-1{left:15%;height:60%;top:10%;animation-delay:0s}
+.beam-2{left:85%;height:40%;top:20%;animation-delay:2s}
+.beam-3{left:30%;height:50%;top:15%;animation-delay:4s}
+.beam-4{left:70%;height:45%;top:20%;animation-delay:1s}
+
+@keyframes beamAnim{
+  0%,100%{opacity:0;transform:scaleY(.8)}
+  40%,60%{opacity:.25;transform:scaleY(1)}
+}
+
+/* Floating particles */
+.particles{
+  position:absolute;
+  inset:0;
+}
+.particle{
+  position:absolute;
+  width:2px;
+  height:2px;
+  border-radius:50%;
+  background:var(--cyan);
+  opacity:0;
+  animation:particleFloat linear infinite;
+}
+
+@keyframes particleFloat{
+  0%{opacity:0;transform:translateY(0) scale(0)}
+  10%{opacity:.6}
+  90%{opacity:.3}
+  100%{opacity:0;transform:translateY(-100vh) scale(1.5)}
+}
+
+/* Top gradient dark overlay */
+.bg-top-fade{
+  position:absolute;
+  top:0;left:0;right:0;
+  height:40%;
+  background:linear-gradient(to bottom, var(--black) 0%, transparent 100%);
+}
+
+/* Scan line effect */
+.scanline{
+  position:absolute;
+  width:100%;
+  height:2px;
+  background:linear-gradient(90deg, transparent 0%, rgba(0,212,255,.15) 30%, rgba(0,212,255,.3) 50%, rgba(0,212,255,.15) 70%, transparent 100%);
+  animation:scan 8s linear infinite;
+  opacity:.5;
+}
+@keyframes scan{
+  0%{top:-2px}
+  100%{top:100%}
+}
+
+/* ─── LAYOUT ─── */
+.page{
+  position:relative;
+  z-index:1;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:60px 24px;
+  text-align:center;
+}
+
+/* ─── TOP NAV LINE ─── */
+.top-bar{
+  position:fixed;
+  top:0;left:0;right:0;
+  z-index:10;
+  height:1px;
+  background:linear-gradient(90deg, transparent 0%, var(--cyan) 30%, var(--gold) 70%, transparent 100%);
+  opacity:.6;
+}
+
+/* ─── LOGO MARK ─── */
+.logo-mark{
+  margin-bottom:48px;
+  animation:fadeUp .8s ease both;
+  animation-delay:.1s;
+}
+
+.logo-hex{
+  position:relative;
+  display:inline-block;
+  margin-bottom:16px;
+}
+
+.s6-emblem{
+  width:72px;
+  height:72px;
+  border:1px solid rgba(0,212,255,.3);
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  margin:0 auto 12px;
+}
+
+.s6-emblem::before{
+  content:'';
+  position:absolute;
+  inset:-6px;
+  border-radius:50%;
+  border:1px solid rgba(0,212,255,.12);
+}
+
+.s6-emblem::after{
+  content:'';
+  position:absolute;
+  inset:-12px;
+  border-radius:50%;
+  border:1px solid rgba(0,212,255,.06);
+}
+
+.s6-letter{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:28px;
+  letter-spacing:2px;
+  color:var(--cyan);
+  text-shadow:0 0 20px rgba(0,212,255,.5);
+}
+
+.logo-wordmark{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:15px;
+  letter-spacing:.5em;
+  color:var(--muted);
+  text-transform:uppercase;
+}
+
+/* ─── HEADLINE ─── */
+.headline-block{
+  margin-bottom:32px;
+  animation:fadeUp .8s ease both;
+  animation-delay:.25s;
+}
+
+.headline-eyebrow{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-size:15px;
+  color:var(--gold);
+  letter-spacing:.2em;
+  margin-bottom:16px;
+  opacity:.85;
+}
+
+.headline-main{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(52px, 10vw, 110px);
+  line-height:.92;
+  letter-spacing:.02em;
+  color:var(--white);
+  text-shadow:0 0 80px rgba(0,212,255,.1);
+  margin-bottom:8px;
+}
+
+.headline-accent{
+  display:block;
+  background:linear-gradient(135deg, var(--cyan) 0%, var(--gold-light) 100%);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+.headline-sub{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(16px, 2.5vw, 22px);
+  font-weight:300;
+  color:rgba(240,240,248,.5);
+  letter-spacing:.08em;
+  margin-top:12px;
+}
+
+/* ─── DIVIDER ─── */
+.divider{
+  width:80px;
+  height:1px;
+  background:linear-gradient(90deg, transparent, var(--cyan), transparent);
+  margin:28px auto;
+  animation:fadeUp .8s ease both;
+  animation-delay:.35s;
+}
+
+/* ─── CONCEPT LINE ─── */
+.concept-line{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(14px, 2vw, 18px);
+  font-weight:300;
+  font-style:italic;
+  color:rgba(240,240,248,.45);
+  letter-spacing:.12em;
+  max-width:540px;
+  line-height:1.8;
+  margin:0 auto 40px;
+  animation:fadeUp .8s ease both;
+  animation-delay:.4s;
+}
+
+/* ─── ATTRACTION PILLS ─── */
+.attractions{
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin-bottom:48px;
+  animation:fadeUp .8s ease both;
+  animation-delay:.5s;
+}
+
+.attr-pill{
+  border:1px solid rgba(0,212,255,.2);
+  border-radius:2px;
+  padding:8px 18px;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:13px;
+  letter-spacing:.18em;
+  color:rgba(0,212,255,.7);
+  background:rgba(0,212,255,.04);
+  backdrop-filter:blur(4px);
+  transition:all .3s ease;
+}
+
+.attr-pill:hover{
+  border-color:rgba(0,212,255,.5);
+  color:var(--cyan);
+  background:rgba(0,212,255,.08);
+  text-shadow:0 0 12px rgba(0,212,255,.4);
+}
+
+/* ─── EMAIL FORM ─── */
+.form-block{
+  width:100%;
+  max-width:440px;
+  margin:0 auto 48px;
+  animation:fadeUp .8s ease both;
+  animation-delay:.6s;
+}
+
+.form-label{
+  font-family:'Cormorant Garamond',serif;
+  font-size:13px;
+  letter-spacing:.15em;
+  color:var(--gold);
+  opacity:.8;
+  display:block;
+  margin-bottom:12px;
+  text-transform:uppercase;
+}
+
+.form-row{
+  display:flex;
+  gap:0;
+  border:1px solid rgba(0,212,255,.25);
+  border-radius:2px;
+  overflow:hidden;
+  transition:border-color .3s;
+}
+
+.form-row:focus-within{
+  border-color:rgba(0,212,255,.6);
+  box-shadow:0 0 20px rgba(0,212,255,.08);
+}
+
+.form-input{
+  flex:1;
+  background:rgba(0,212,255,.04);
+  border:none;
+  outline:none;
+  padding:14px 18px;
+  font-family:'DM Sans',sans-serif;
+  font-size:13px;
+  font-weight:300;
+  color:var(--white);
+  letter-spacing:.05em;
+}
+
+.form-input::placeholder{
+  color:var(--muted);
+  letter-spacing:.08em;
+}
+
+.form-btn{
+  background:linear-gradient(135deg, rgba(0,212,255,.15), rgba(200,151,58,.15));
+  border:none;
+  border-left:1px solid rgba(0,212,255,.2);
+  padding:14px 22px;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:13px;
+  letter-spacing:.2em;
+  color:var(--cyan);
+  cursor:pointer;
+  transition:all .3s;
+  white-space:nowrap;
+}
+
+.form-btn:hover{
+  background:rgba(0,212,255,.2);
+  color:var(--white);
+  text-shadow:0 0 10px rgba(0,212,255,.5);
+}
+
+.form-note{
+  font-size:11px;
+  color:var(--muted);
+  margin-top:10px;
+  letter-spacing:.05em;
+}
+
+/* ─── META INFO ─── */
+.meta-row{
+  display:flex;
+  gap:32px;
+  justify-content:center;
+  flex-wrap:wrap;
+  animation:fadeUp .8s ease both;
+  animation-delay:.7s;
+}
+
+.meta-item{
+  text-align:center;
+}
+
+.meta-value{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:22px;
+  letter-spacing:.1em;
+  color:var(--white);
+  display:block;
+}
+
+.meta-label{
+  font-size:10px;
+  letter-spacing:.2em;
+  color:var(--muted);
+  text-transform:uppercase;
+  margin-top:4px;
+  display:block;
+}
+
+.meta-sep{
+  width:1px;
+  height:36px;
+  background:rgba(0,212,255,.15);
+  align-self:center;
+}
+
+/* ─── BOTTOM STRIP ─── */
+.bottom-strip{
+  position:fixed;
+  bottom:0;left:0;right:0;
+  z-index:10;
+  padding:14px 32px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-top:1px solid rgba(0,212,255,.08);
+  background:rgba(2,2,5,.8);
+  backdrop-filter:blur(12px);
+}
+
+.bottom-location{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:12px;
+  letter-spacing:.3em;
+  color:var(--muted);
+}
+
+.bottom-location span{
+  color:rgba(0,212,255,.5);
+  margin-right:8px;
+}
+
+.bottom-link{
+  font-size:11px;
+  letter-spacing:.15em;
+  color:var(--muted);
+  text-decoration:none;
+  transition:color .3s;
+}
+
+.bottom-link:hover{
+  color:var(--cyan);
+}
+
+/* ─── GOLD ACCENT LINE ─── */
+.gold-rule{
+  width:1px;
+  height:60px;
+  background:linear-gradient(to bottom, transparent, var(--gold), transparent);
+  margin:0 auto 32px;
+  opacity:.4;
+  animation:fadeUp .8s ease both;
+  animation-delay:.2s;
+}
+
+/* ─── COUNTOWN (optional) ─── */
+.countdown{
+  display:flex;
+  gap:20px;
+  justify-content:center;
+  margin-bottom:40px;
+  animation:fadeUp .8s ease both;
+  animation-delay:.55s;
+}
+
+.cd-unit{
+  text-align:center;
+  min-width:64px;
+}
+
+.cd-num{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:42px;
+  line-height:1;
+  color:var(--white);
+  display:block;
+  text-shadow:0 0 20px rgba(0,212,255,.2);
+}
+
+.cd-label{
+  font-size:9px;
+  letter-spacing:.3em;
+  color:var(--muted);
+  text-transform:uppercase;
+  margin-top:6px;
+  display:block;
+}
+
+.cd-sep{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:36px;
+  color:rgba(0,212,255,.2);
+  align-self:flex-start;
+  padding-top:4px;
+}
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(24px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* ─── SUCCESS STATE ─── */
+.success-msg{
+  display:none;
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-size:15px;
+  color:var(--gold);
+  letter-spacing:.1em;
+  margin-top:12px;
+}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:600px){
+  .meta-sep{display:none}
+  .bottom-strip{flex-direction:column;gap:8px;text-align:center}
+  .attractions{gap:8px}
+  .attr-pill{font-size:11px;padding:6px 14px}
+}
+</style>
+</head>
+<body>
+
+<!-- TOP RULE -->
+<div class="top-bar"></div>
+
+<!-- BACKGROUND -->
+<div class="bg-wrap">
+  <div class="grid-floor"></div>
+  <div class="bg-glow-center"></div>
+  <div class="beam beam-1"></div>
+  <div class="beam beam-2"></div>
+  <div class="beam beam-3"></div>
+  <div class="beam beam-4"></div>
+  <div class="particles" id="particles"></div>
+  <div class="bg-top-fade"></div>
+  <div class="scanline"></div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="page">
+
+  <!-- LOGO -->
+  <div class="logo-mark">
+    <div class="s6-emblem">
+      <span class="s6-letter">S6</span>
+    </div>
+    <div class="logo-wordmark">Simulation6</div>
+  </div>
+
+  <!-- GOLD RULE -->
+  <div class="gold-rule"></div>
+
+  <!-- HEADLINE -->
+  <div class="headline-block">
+    <div class="headline-eyebrow">Targeting Metro Vancouver Area · Q4 2026</div>
+    <h1 class="headline-main">
+      Something<br>
+      <span class="headline-accent">Extraordinary</span><br>
+      Is Coming
+    </h1>
+    <p class="headline-sub">Where Fitness Meets Immersive Gaming</p>
+    <p style="font-family:'Bebas Neue',sans-serif;font-size:clamp(13px,1.8vw,17px);letter-spacing:.3em;color:rgba(0,212,255,.6);margin-top:14px;text-transform:uppercase">No Headsets &nbsp;·&nbsp; No Goggles &nbsp;·&nbsp; Just Real Movement</p>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- CONCEPT LINE -->
+  <p class="concept-line">
+    British Columbia's first mixed-reality active gaming venue —
+    powered by technology that has captured over 100 million views worldwide.
+  </p>
+
+  <!-- ATTRACTIONS -->
+  <div class="attractions">
+    <div class="attr-pill">ValoArena</div>
+    <div class="attr-pill">ValoClimb</div>
+    <div class="attr-pill">MultiBall</div>
+    <div class="attr-pill">+ More</div>
+  </div>
+
+  <!-- COUNTDOWN -->
+  <div class="countdown">
+    <div class="cd-unit">
+      <span class="cd-num" id="cd-days">000</span>
+      <span class="cd-label">Days</span>
+    </div>
+    <div class="cd-sep">:</div>
+    <div class="cd-unit">
+      <span class="cd-num" id="cd-hours">00</span>
+      <span class="cd-label">Hours</span>
+    </div>
+    <div class="cd-sep">:</div>
+    <div class="cd-unit">
+      <span class="cd-num" id="cd-mins">00</span>
+      <span class="cd-label">Minutes</span>
+    </div>
+    <div class="cd-sep">:</div>
+    <div class="cd-unit">
+      <span class="cd-num" id="cd-secs">00</span>
+      <span class="cd-label">Seconds</span>
+    </div>
+  </div>
+
+  <!-- EMAIL FORM -->
+  <div class="form-block">
+    <label class="form-label">Be the first to experience it</label>
+    <div class="form-row">
+      <input
+        class="form-input"
+        type="email"
+        id="email-input"
+        placeholder="Enter your email address"
+        autocomplete="email"
+      />
+      <button class="form-btn" onclick="handleSubmit()">Request Founding Member Access</button>
+    </div>
+    <div class="form-note">No spam. First access. Founding member pricing reserved.</div>
+    <div class="success-msg" id="success-msg">
+      ✦ You're on the list. We'll be in touch soon.
+    </div>
+  </div>
+
+  <!-- META -->
+  <div class="meta-row">
+    <div class="meta-item">
+      <span class="meta-value">3</span>
+      <span class="meta-label">World-First Rooms</span>
+    </div>
+    <div class="meta-sep"></div>
+    <div class="meta-item">
+      <span class="meta-value">6</span>
+      <span class="meta-label">Players Per Wave</span>
+    </div>
+    <div class="meta-sep"></div>
+    <div class="meta-item">
+      <span class="meta-value" style="font-size:16px">BC's Only</span>
+      <span class="meta-label">MR Venue</span>
+    </div>
+    <div class="meta-sep"></div>
+    <div class="meta-item">
+      <span class="meta-value">Q4 '26</span>
+      <span class="meta-label">Opening</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM STRIP -->
+<div class="bottom-strip">
+  <div class="bottom-location">
+    <span>◈</span>Targeting Metro Vancouver Area, BC, Canada
+  </div>
+  <a href="mailto:rich@simulation6.ca" class="bottom-link">rich@simulation6.ca</a>
+  <a href="https://simulation6.ca" class="bottom-link">simulation6.ca</a>
+</div>
+
+<script>
+// ─── PARTICLES ───
+const container = document.getElementById('particles');
+const count = 40;
+for(let i = 0; i < count; i++){
+  const p = document.createElement('div');
+  p.className = 'particle';
+  p.style.cssText = `
+    left:${Math.random()*100}%;
+    bottom:${Math.random()*30}%;
+    animation-duration:${6 + Math.random()*10}s;
+    animation-delay:${Math.random()*8}s;
+    opacity:0;
+    width:${Math.random() > .7 ? 3 : 2}px;
+    height:${Math.random() > .7 ? 3 : 2}px;
+  `;
+  container.appendChild(p);
+}
+
+// ─── COUNTDOWN to Oct 1 2026 ───
+function updateCountdown(){
+  const target = new Date('2026-10-31T00:00:00');
+  const now = new Date();
+  const diff = target - now;
+  if(diff <= 0){
+    document.querySelector('.countdown').innerHTML = '<div style="font-family:Bebas Neue,sans-serif;font-size:28px;letter-spacing:.2em;color:#00D4FF">We Are Open</div>';
+    return;
+  }
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  document.getElementById('cd-days').textContent = String(d).padStart(3,'0');
+  document.getElementById('cd-hours').textContent = String(h).padStart(2,'0');
+  document.getElementById('cd-mins').textContent = String(m).padStart(2,'0');
+  document.getElementById('cd-secs').textContent = String(s).padStart(2,'0');
+}
+updateCountdown();
+setInterval(updateCountdown, 1000);
+
+// ─── EMAIL SUBMIT ───
+function handleSubmit(){
+  const input = document.getElementById('email-input');
+  const success = document.getElementById('success-msg');
+  const email = input.value.trim();
+  if(!email || !email.includes('@')){
+    input.style.borderLeft = '2px solid rgba(248,113,113,.5)';
+    setTimeout(() => input.style.borderLeft = '', 1500);
+    return;
+  }
+  input.closest('.form-row').style.opacity = '.4';
+  input.closest('.form-row').style.pointerEvents = 'none';
+  success.style.display = 'block';
+  // In production: connect to Mailchimp, ConvertKit, or Google Sheets via fetch
+  console.log('Email captured:', email);
+}
+
+document.getElementById('email-input').addEventListener('keypress', e => {
+  if(e.key === 'Enter') handleSubmit();
+});
+</script>
+</body>
+</html>
