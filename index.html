@@ -641,20 +641,23 @@ body{
   <!-- EMAIL FORM -->
   <div class="form-block">
     <label class="form-label">Be the first to experience it</label>
-    <div class="form-row">
-      <input
-        class="form-input"
-        type="email"
-        id="email-input"
-        placeholder="Enter your email address"
-        autocomplete="email"
-      />
-      <button class="form-btn" onclick="handleSubmit()">Request Founding Member Access</button>
-    </div>
+    
+    <form action="https://formsubmit.co/rich@simulation6.ca" method="POST">
+      <input type="hidden" name="_next" value="https://simulation6.ca">
+      <div class="form-row">
+        <input
+          class="form-input"
+          type="email"
+          name="email"
+          id="email-input"
+          placeholder="Enter your email address"
+          required
+        />
+        <button type="submit" class="form-btn">Request Founding Member Access</button>
+      </div>
+    </form>
+
     <div class="form-note">No spam. First access. Founding member pricing reserved.</div>
-    <div class="success-msg" id="success-msg">
-      ✦ You're on the list. We'll be in touch soon.
-    </div>
   </div>
 
   <!-- META -->
@@ -731,26 +734,7 @@ function updateCountdown(){
 updateCountdown();
 setInterval(updateCountdown, 1000);
 
-// ─── EMAIL SUBMIT ───
-function handleSubmit(){
-  const input = document.getElementById('email-input');
-  const success = document.getElementById('success-msg');
-  const email = input.value.trim();
-  if(!email || !email.includes('@')){
-    input.style.borderLeft = '2px solid rgba(248,113,113,.5)';
-    setTimeout(() => input.style.borderLeft = '', 1500);
-    return;
-  }
-  input.closest('.form-row').style.opacity = '.4';
-  input.closest('.form-row').style.pointerEvents = 'none';
-  success.style.display = 'block';
-  // In production: connect to Mailchimp, ConvertKit, or Google Sheets via fetch
-  console.log('Email captured:', email);
-}
 
-document.getElementById('email-input').addEventListener('keypress', e => {
-  if(e.key === 'Enter') handleSubmit();
-});
 </script>
 </body>
 </html>
